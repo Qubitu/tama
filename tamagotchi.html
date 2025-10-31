@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tamagotchi Retro</title>
+<style>
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  #pet-frame {
+    display: inline-block;
+    border: 3px solid #fff;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #111;
+    margin: 20px auto;
+  }
+
+  #pet {
+    width: 200px;
+    height: 200px;
+    image-rendering: pixelated;
+  }
+
+  .stats {
+    margin: 10px;
+    font-size: 16px;
+  }
+
+  button {
+    background: #000;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 8px 20px;
+    margin: 5px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+  }
+
+  button:hover {
+    background: #fff;
+    color: #000;
+  }
+</style>
+</head>
+<body>
+
+<h1>Virtual Pet</h1>
+
+<div id="pet-frame">
+  <img id="pet" src="pet-happy.webp" alt="Tamagotchi">
+</div>
+
+<div class="stats">
+  Hunger: <span id="hunger">50</span><br>
+  Happiness: <span id="happiness">50</span>
+</div>
+
+<button onclick="feed()">Feed</button>
+<button onclick="play()">Play</button>
+<button onclick="sleep()">Sleep</button>
+
+<script>
+let hunger = 50;
+let happiness = 50;
+let energy = 50;
+let notifiedHungry = false;
+let notifiedSad = false;
+
+// Ask user for notification permission
+if ("Notification" in window && Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+
+// Send notification helper
+function sendNotification(message) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("Tamagotchi", { body: message, icon: "pet-happy.webp" });
+  }
+}
+
+// Update stats every 2 seconds
+setInterval(() => {
+  hunger = Math.min(hunger + 1, 100);
+  happiness = Math.max(happiness - 1, 0);
+  energy = Math.max(energy - 0.5, 0);
+
+  document.getElementById('hunger').textContent = Math.round(hunger);
+  document.getElementById('happiness').textContent = Math.round(happiness);
+
+  updatePetImage();
+}, 2000);
+
+// Actions
+function feed() {
+  hunger = Math.max(hunger - 20, 0);
+  notifiedHungry = false;
+  updatePetImage();
+}
+
+function play() {
+  if (energy > 10) {
+    happiness = Math.min(happiness + 20, 100);
+    energy -= 10;
+  }
+  notifiedSad = false;
+  updatePetImage();
+}
+
+function sleep() {
+  energy = Math.min(energy + 30, 100);
+  hunger = Math.min(hunger + 10, 100);
+  updatePetImage();
+}
+
+// Update pet image + notifications
+function updatePetImage() {
+  const pet = document.getElementById('pet');
+
+  if (hunger > 70) {
+    pet.src = 'Giyuu_Hungry.webp';
+    if (!notifiedHungry) {
+      sendNotification("Your pet is hungry!");
+      notifiedHungry = true;
+    }
+  } else if (happiness < 30) {
+    pet.src = 'Giyuu_Battle.webp';
+    if (!notifiedSad) {
+      sendNotification("Your pet is sad!");
+      notifiedSad = true;
+    }
+  } else if (energy < 20) {
+    pet.src = 'Giyuu_Sleeping.webp';
+  } else {
+    pet.src = 'Giyuu_Idle_Animation.webp';
+  }
+}
+</script>
+
+</body>
+</html>
+
